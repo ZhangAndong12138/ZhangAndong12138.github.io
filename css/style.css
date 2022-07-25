@@ -413,12 +413,12 @@
 }
 .content table {
   width: 100%;
-  font-size: 12px;
+  font-size: 13px;
   border-collapse: collapse;
   text-align: left;
 }
 .content th {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   color: #383838;
   border-bottom: 1px dashed #ccc;
@@ -442,8 +442,8 @@ html {
 body {
   color: #383838;
   background-color: #fff;
-  font-size: 14px;
-  font-family: "Menlo", "Meslo LG", monospace;
+  font-size: 15px;
+  font-family: firacode, consolas, "Microsoft YaHei", "Menlo", "Meslo LG", monospace;
   font-weight: 400;
   line-height: 1.725;
   text-rendering: geometricPrecision;
@@ -1095,6 +1095,7 @@ article .content .video-container embed {
 }
 article .content blockquote {
   background: inherit;
+  background-color: #333;
   color: #ccffb6;
   border-left: 0px solid #ccc;
   margin: 1rem 10px;
@@ -1381,7 +1382,7 @@ article .content .caption {
   font-weight: bold;
 }
 pre {
-  font-family: "Menlo", "Meslo LG", monospace;
+  font-family: firacode, consolas, "Microsoft YaHei", "Menlo", "Meslo LG", monospace;
   font-size: 13px;
   padding: 0px 15px;
   padding-bottom: 0;
@@ -1394,8 +1395,11 @@ pre {
 code {
   -webkit-border-radius: 2px;
   border-radius: 2px;
-  background: #eee;
+  background: #666;
   padding: 0 5px;
+  color: #ccffb6;
+  font-weight: bold;
+  font-family: firacode, consolas;
 }
 pre code {
   border: none;
@@ -1403,7 +1407,7 @@ pre code {
   padding: 0;
 }
 .highlight {
-  font-family: "Menlo", "Meslo LG", monospace;
+  font-family: firacode, consolas, "Microsoft YaHei", "Menlo", "Meslo LG", monospace;
   -webkit-border-radius: 4px;
   border-radius: 4px;
   padding: 0px 15px;

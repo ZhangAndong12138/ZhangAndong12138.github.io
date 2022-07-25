@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1. 什么是HashMap我们先来看源码中HashMap类的描述  一个基于哈希表的Map接口的实现。 这个实现提供了map所有的可选的操作，允许键和值为null。（HashMap类除了线程不安全和允许null之外大体上和HashTable类是相同的）这个类不对map的顺序做保证；特别是，它不能保证顺序会随着时间的推移保持不变。 假设哈希方法能把元素正确的分散到各个桶里，这个实现就可以提供常数时间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap（1）- 定义，静态变量和内部类">
+<meta property="og:url" content="http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/index.html">
+<meta property="og:site_name" content="你跺你也麻">
+<meta property="og:description" content="1. 什么是HashMap我们先来看源码中HashMap类的描述  一个基于哈希表的Map接口的实现。 这个实现提供了map所有的可选的操作，允许键和值为null。（HashMap类除了线程不安全和允许null之外大体上和HashTable类是相同的）这个类不对map的顺序做保证；特别是，它不能保证顺序会随着时间的推移保持不变。 假设哈希方法能把元素正确的分散到各个桶里，这个实现就可以提供常数时间">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-21T07:40:39.110Z">
+<meta property="article:author" content="zad">
+<meta property="article:tag" content="源码笔记">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>HashMap（1）- 定义，静态变量和内部类</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/"><i class="fa fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/06/15/%E7%97%9B%E8%8B%A6%E6%9D%A5%E6%BA%90%E4%BA%8E%E6%AF%94%E8%BE%83%E2%80%94%E2%80%94hashCode()%20%E5%92%8C%20equals(Object),%E4%BB%80%E4%B9%88%E6%98%AF%E7%9B%B8%E7%AD%89/"><i class="fa fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fa fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/"><i class="fa fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&text=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&is_video=false&description=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HashMap（1）- 定义，静态变量和内部类&body=Check out this article: http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/"><i class="fa fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&name=HashMap（1）- 定义，静态变量和内部类&description="><i class="fa fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AFHashMap"><span class="toc-number">1.</span> <span class="toc-text">1. 什么是HashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-HashMap%E7%9A%84%E5%87%A0%E4%B8%AA%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">2. HashMap的几个静态变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-HashMap%E7%9A%84%E5%87%A0%E4%B8%AA%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">3. HashMap的几个内部类</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index width mx-auto px2 my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HashMap（1）- 定义，静态变量和内部类
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">你跺你也麻</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2022-07-11T16:00:00.000Z" itemprop="datePublished">2022-07-12</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E6%BA%90%E7%A0%81%E7%AC%94%E8%AE%B0/" rel="tag">源码笔记</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="1-什么是HashMap"><a href="#1-什么是HashMap" class="headerlink" title="1. 什么是HashMap"></a>1. 什么是HashMap</h2><p>我们先来看源码中<code>HashMap</code>类的描述</p>
+<blockquote>
+<p>一个基于哈希表的<code>Map</code>接口的实现。</p>
+<p>这个实现提供了map所有的可选的操作，允许键和值为<code>null</code>。（<code>HashMap</code>类除了线程不安全和允许<code>null</code>之外大体上和<code>HashTable</code>类是相同的）这个类不对map的顺序做保证；特别是，它不能保证顺序会随着时间的推移保持不变。</p>
+<p>假设哈希方法能把元素正确的分散到各个桶里，这个实现就可以提供<strong>常数时间性能</strong>(constant-time performance)的基础操作（<code>get</code>和<code>put</code>）。遍历一个<code>HashMap</code>实例所需的时间和它的“容量”（桶的数量）加上它的大小（键值的数量）成正比。因此，如果对遍历的性能有重要要求的话，就不要把初始容量设置的过高（或者把负载系数<code>load factor</code>设置的过低）。</p>
+<p>有两个参数对于一个<code>HashMap</code>的实例的性能有影响：<em>初始容量</em>（<code>initial capacity</code>）和<em>负载系数</em>（<code>load factor</code>）。<em>容量</em>就是哈希表中桶的数量，而初始容量也就是哈希表创建时的容量。<em>负载系数</em>是哈希表容量在自动增加之前允许达到的最大的容量的系数。当哈希表的键值对数量超过了当前容量和负载系数计算得出的数量时，哈希表进行<code>rehashed</code>（重新建立内部的数据结构），哈希表中桶的数量大概会变成之前的两倍。</p>
+<p>一般来说，默认的负载系数（0.75）是权衡了时间消耗和空间消耗得出的值。更高的值能降低空间开销但是会提高查询的消耗（在<code>HashMap</code>类的大部分操作中都会有所体现，包括<code>get</code>和<code>put</code>）。在设置初始容量时，应该考虑预期的键值对数量和负载因子的值，从而尽量减少<code>rehash</code>的次数。如果初始容量比键值对数量除以负载因子大的话，就根本不会发生<code>rehash</code>了。</p>
+<p>如果一个<code>HashMap</code>实例中想要存储很多映射关系，创建的时候指定一个足够大的容量会比让它在需要的时候自动<code>rehash</code>增长哈希表来的更有效。请记住，使用具有相同<code>hashCode()</code>返回值的key一定会减慢任何一个哈希表的性能。为了改善这种影响，当key实现了<code>Comparable</code>接口时，这个类可能会把key进行比较，来解决问题。</p>
+<p><strong>注意，这个实现时线程不安全的</strong>。如果多个线程要同时访问一个<code>HashMap</code>,而且至少一个线程要修改map的结构的话，那么必须在外部进行同步。（所谓修改map的结构是指任何新增或删除了映射关系的操作，仅仅修改已经存在的某个键对应的值的话，不算修改结构。）这通常是由封装了这个map的对象来实现的。如果不存在这样的对象，map应该使用<code>Collections.synchrinizedMap</code>方法来包装。为了防止意外的不同步访问列表，最好在创建的时候来完成:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;Map m = Collections.synchronizedMap(<span class="keyword">new</span> HashMap(...));</span><br></pre></td></tr></table></figure>
+
+<p>类的所有“集合视图方法”返回的iterator都是<em>快速失败</em>（<code>fail-fast</code>）的：如果在iterator创建后的任何时间对映射进行结构修改，除了通过<strong>迭代器</strong>自己的 <code>remove</code>方法外，迭代器将抛出 <code>ConcurrentModificationException</code>。因此，面对并发修改，迭代器将快速而干净地失败，而不是在未来去冒不确定的时间发生不确定行为的风险。</p>
+<p>注意，不能保证迭代器的<em>快速失败</em>（<code>fail-fast</code>）行为，因为一般来说，在存在非同步并发修改的情况下不可能做出任何硬性保证。 <em>快速失败</em>（<code>fail-fast</code>）的迭代器会尽最大努力抛出 <code>ConcurrentModificationException</code>。 因此，编写一个依赖这个异常来确保其正确性的程序是错误的：<em>迭代器的快速失败行为应该仅用于检测错误</em>。</p>
+</blockquote>
+<p>简单总结一下，主要是这么几点：</p>
+<ol>
+<li><code>HashMap</code>允许键和值为<code>null</code></li>
+<li><code>HashMap</code>是无序的</li>
+<li><code>HashMap</code>是线程不安全的</li>
+<li><code>HashMap</code>的性能受到<em>初始容量</em>（<code>initial capacity</code>）和<em>负载系数</em>（<code>load factor</code>）这两个参数的影响，如果使用正确的话，<code>HashMap</code>可以提供<strong>常数时间性能</strong>(constant-time performance)的基础操作（<code>get</code>和<code>put</code>）。</li>
+</ol>
+<p>前面三点都很好理解，我们着重来看一下第四点</p>
+<h2 id="2-HashMap的几个静态变量"><a href="#2-HashMap的几个静态变量" class="headerlink" title="2. HashMap的几个静态变量"></a>2. HashMap的几个静态变量</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The default initial capacity - MUST be a power of two.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_INITIAL_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">4</span>; <span class="comment">// aka 16</span></span><br></pre></td></tr></table></figure>
+<p>默认的<em>初始容量</em>（<code>initial capacity</code>），要求必须是2的n次方，值为1&lt;&lt;4 也就是16。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The maximum capacity, used if a higher value is implicitly specified</span></span><br><span class="line"><span class="comment"> * by either of the constructors with arguments.</span></span><br><span class="line"><span class="comment"> * MUST be a power of two &lt;= 1&lt;&lt;30.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_CAPACITY = <span class="number">1</span> &lt;&lt; <span class="number">30</span>;</span><br></pre></td></tr></table></figure>
+<p>最大的容量，如果两个带参数的构造方法隐式的指定了更高的值，就用这个值。要求必须是2的n次方，值为<code>1&lt;&lt;30</code> 也就是<code>1 073 741 824</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The load factor used when none specified in constructor.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">float</span> DEFAULT_LOAD_FACTOR = <span class="number">0.75f</span>;</span><br></pre></td></tr></table></figure>
+<p>默认的<em>负载系数</em>（<code>load factor</code>），如果构造方法没有指定，就使用这个值。值为<code>0.75f</code>。</p>
+<p>也就是说，我们平时最常用的无参数的构造方法，是创建了一个初始容量为16，负载系数为0.75的<code>HashMap</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The bin count threshold for using a tree rather than list for a</span></span><br><span class="line"><span class="comment"> * bin.  Bins are converted to trees when adding an element to a</span></span><br><span class="line"><span class="comment"> * bin with at least this many nodes. The value must be greater</span></span><br><span class="line"><span class="comment"> * than 2 and should be at least 8 to mesh with assumptions in</span></span><br><span class="line"><span class="comment"> * tree removal about conversion back to plain bins upon</span></span><br><span class="line"><span class="comment"> * shrinkage.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TREEIFY_THRESHOLD = <span class="number">8</span>;</span><br></pre></td></tr></table></figure>
+<p>使用树而不是列表的桶计数阈值。当向桶里添加新的元素，而且一个桶里有至少这么多的节点时，要把这个桶转化为树。这个值必须大于2，并且应该最少是8，来满足假设当移除节点时将树再转化为列表的操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The bin count threshold for untreeifying a (split) bin during a</span></span><br><span class="line"><span class="comment"> * resize operation. Should be less than TREEIFY_THRESHOLD, and at</span></span><br><span class="line"><span class="comment"> * most 6 to mesh with shrinkage detection under removal.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> UNTREEIFY_THRESHOLD = <span class="number">6</span>;</span><br></pre></td></tr></table></figure>
+<p>在<code>resize</code>操作时将树转化为列表的阈值，应该比<code>TREEIFY_THRESHOLD</code>小，并且最大为6，来满足移除操作时的收缩检查。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The smallest table capacity for which bins may be treeified.</span></span><br><span class="line"><span class="comment"> * (Otherwise the table is resized if too many nodes in a bin.)</span></span><br><span class="line"><span class="comment"> * Should be at least 4 * TREEIFY_THRESHOLD to avoid conflicts</span></span><br><span class="line"><span class="comment"> * between resizing and treeification thresholds.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_TREEIFY_CAPACITY = <span class="number">64</span>;</span><br></pre></td></tr></table></figure>
+<p>可以把列表转化为树的最小哈希表容量（否则如果一个桶里有太多的节点，表就会被<code>resize</code>）。最少应该是<code>4 *  TREEIFY_THRESHOLD</code>，来避免重新分配大小和转化为树的阀值的冲突。</p>
+<h2 id="3-HashMap的几个内部类"><a href="#3-HashMap的几个内部类" class="headerlink" title="3. HashMap的几个内部类"></a>3. HashMap的几个内部类</h2><p>接下来我们来看一下<code>HashMap</code>的几个主要的内部类，也就是如何实现<code>Map</code>接口定义的几个内部接口的</p>
+<ol>
+<li><p>Node</p>
+<p><code>Node</code>是<code>map</code>中的一个实体（一个键值对），提供了<code>getKey()</code>、<code>getValue()</code>和<code>setValue()</code>几个方法。包括<code>hash</code>、<code>key</code>、<code>value</code>和<code>next</code>几个属性，而<code>final</code>修饰符表明一个<code>Node</code>的<code>key</code>和<code>hash</code>一旦被设定，是不允许进行修改的。而通过<code>next</code>可以看出<code>Node</code>类实质上是一个单向链表。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * Basic hash bin node, used for most entries.  (See below for</span></span><br><span class="line"><span class="comment">  * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> hash; <span class="comment">// 哈希值，final类型表明初始化后不会再被修改</span></span><br><span class="line">    <span class="keyword">final</span> K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line"></span><br><span class="line">    Node(<span class="keyword">int</span> hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        <span class="keyword">this</span>.hash = hash;</span><br><span class="line">        <span class="keyword">this</span>.key = key;</span><br><span class="line">        <span class="keyword">this</span>.value = value;</span><br><span class="line">        <span class="keyword">this</span>.next = next;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> K <span class="title">getKey</span><span class="params">()</span>        </span>&#123; <span class="keyword">return</span> key; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">getValue</span><span class="params">()</span>      </span>&#123; <span class="keyword">return</span> value; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> key + <span class="string">&quot;=&quot;</span> + value; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Objects.hashCode(key) ^ Objects.hashCode(value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">setValue</span><span class="params">(V newValue)</span> </span>&#123;</span><br><span class="line">        V oldValue = value;</span><br><span class="line">        value = newValue;</span><br><span class="line">        <span class="keyword">return</span> oldValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (o == <span class="keyword">this</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (o <span class="keyword">instanceof</span> Map.Entry) &#123;</span><br><span class="line">            Map.Entry&lt;?,?&gt; e = (Map.Entry&lt;?,?&gt;)o;</span><br><span class="line">            <span class="keyword">if</span> (Objects.equals(key, e.getKey()) &amp;&amp;</span><br><span class="line">                Objects.equals(value, e.getValue()))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>KeySet、Values、EntrySet</p>
+<p><code>KeySet</code>需要结合<code>HashMap</code>本身的<code>KeySet()</code>方法来看，这个方法返回了这个<code>map</code>中包含的所有的<code>key</code>，由于<code>KeySet</code>是基于这个<code>map</code>的，因此修改了<code>map</code>就会反映在这个<code>set</code>里，而且反之亦然。如果在遍历<code>set</code>时修改了<code>map</code>（除了使用迭代器本身提供的<code>remove</code>方法），遍历的结果就会不确定。你可以通过<code>Iterator.remove</code> <code>Set.remove</code> <code>removeAll</code> <code>retainAll</code> <code>clear</code> 这些操作来移除<code>set</code>中的元素，被移除的元素会相应的反映到<code>map</code>里。它不支持<code>add</code>或<code>addAll</code>操作。</p>
+<p>对应的，<code>Values</code>类同样需要结合<code>HashMap</code>本身的<code>values()</code>方法来看，它返回了这个<code>map</code>中所有<code>value</code>的集合，其它的特性和<code>KeySet</code>一致。</p>
+<p>类比<code>KeySet</code>和<code>values</code>，<code>Map.entrySet</code>方法返回的是这个<code>map</code>中所有<code>Entry</code>的集合，其它的特性也是一样的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Set&lt;K&gt; <span class="title">keySet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Set&lt;K&gt; ks = keySet;</span><br><span class="line">    <span class="keyword">if</span> (ks == <span class="keyword">null</span>) &#123;</span><br><span class="line">        ks = <span class="keyword">new</span> KeySet();</span><br><span class="line">        keySet = ks;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ks;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">KeySet</span> <span class="keyword">extends</span> <span class="title">AbstractSet</span>&lt;<span class="title">K</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Collection&lt;V&gt; <span class="title">values</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Collection&lt;V&gt; vs = values;</span><br><span class="line">    <span class="keyword">if</span> (vs == <span class="keyword">null</span>) &#123;</span><br><span class="line">        vs = <span class="keyword">new</span> Values();</span><br><span class="line">        values = vs;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> vs;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Values</span> <span class="keyword">extends</span> <span class="title">AbstractCollection</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet() &#123;</span><br><span class="line">    Set&lt;Map.Entry&lt;K,V&gt;&gt; es;</span><br><span class="line">    <span class="keyword">return</span> (es = entrySet) == <span class="keyword">null</span> ? (entrySet = <span class="keyword">new</span> EntrySet()) : es;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">EntrySet</span> <span class="keyword">extends</span> <span class="title">AbstractSet</span>&lt;<span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt;&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>TreeNode</p>
+<p><code>TreeNode</code>可以说是<code>HashMap</code>最重要的内部类了，它继承自<code>LinkedHashMap.Entry</code>，而<code>LinkedHashMap.Entry</code>反过来又继承了<code>HashMap.Node</code>，这样它就可以用作常规或者链式节点的扩展了。</p>
+<p>从<code>TreeNode</code>的参数和几个关键方法不难看出，它的本质是一棵红黑树。关于红黑树的定义和具体实现，我们这里不再细说，主要来看几个和<code>Node</code>相关的方法。<code>treeify</code>：生成链接到该节点节点树，和<code>untreeify</code>：返回链接到该节点节点树转化成的非树列表。通过这两个方法，可以实现<code>Node</code>和<code>TreeNode</code>的相互转换。可以猜测，<code>HashMap</code>的节点可能是<code>Node</code>，也有可能是<code>TreeNode</code>，而且这两者在某种条件下会相互转换。而这个转换的条件，通过静态变量的文档描述，应该是和<code>TREEIFY_THRESHOLD</code>，<code>UNTREEIFY_THRESHOLD</code> ，<code>MIN_TREEIFY_CAPACITY</code>这三个静态变量有关系。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">LinkedHashMap</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    TreeNode&lt;K,V&gt; parent;  <span class="comment">// red-black tree links</span></span><br><span class="line">    TreeNode&lt;K,V&gt; left;</span><br><span class="line">    TreeNode&lt;K,V&gt; right;</span><br><span class="line">    TreeNode&lt;K,V&gt; prev;    <span class="comment">// needed to unlink next upon deletion</span></span><br><span class="line">    <span class="keyword">boolean</span> red;</span><br><span class="line">    TreeNode(<span class="keyword">int</span> hash, K key, V val, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        <span class="keyword">super</span>(hash, key, val, next);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Forms tree of the nodes linked from this node.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">treeify</span><span class="params">(Node&lt;K,V&gt;[] tab)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns a list of non-TreeNodes replacing those linked from</span></span><br><span class="line"><span class="comment">     * this node.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">final</span> Node&lt;K,V&gt; <span class="title">untreeify</span><span class="params">(HashMap&lt;K,V&gt; map)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看到这里，我基本了解了<code>HashMap</code>内部的数据结构，下一篇再来看<code>HashMap</code>是如何实现<code>put</code>、<code>get</code>、<code>remove</code>等基本操作的。</p>
+</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AFHashMap"><span class="toc-number">1.</span> <span class="toc-text">1. 什么是HashMap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-HashMap%E7%9A%84%E5%87%A0%E4%B8%AA%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">2. HashMap的几个静态变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-HashMap%E7%9A%84%E5%87%A0%E4%B8%AA%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">3.</span> <span class="toc-text">3. HashMap的几个内部类</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/"><i class="fa fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&text=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&is_video=false&description=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HashMap（1）- 定义，静态变量和内部类&body=Check out this article: http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&title=HashMap（1）- 定义，静态变量和内部类"><i class="fa fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/&name=HashMap（1）- 定义，静态变量和内部类&description="><i class="fa fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+      <ul>
+        <li id="toc"><a class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa fa-list fa-lg" aria-hidden="true"></i> TOC</a></li>
+        <li id="share"><a class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa fa-share-alt fa-lg" aria-hidden="true"></i> Share</a></li>
+        <li id="top" style="display:none"><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a></li>
+        <li id="menu"><a class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa fa-bars fa-lg" aria-hidden="true"></i> Menu</a></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2022 zad
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="/lib/meslo-LG/styles.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-37473492-6', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+

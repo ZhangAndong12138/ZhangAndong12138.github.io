@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1. 内网开发的问题内网开发是个好东西：安全、方便管理；但又被我们深恶痛绝：没法远程工作或者要用蛋疼的VPN，软件没法及时更新，查资料不方便，没法Ctrl+C&amp;V……。这些还可以忍一忍，但是作为后端开发，在没有网络环境的情况下安装项目依赖就成了不得不解决的问题。 这时有的同学就会说了：内网开发应该有统一的私有镜像仓库呀。确实，根据小道消息，我司之前确实是有一个私有仓库，但是总之由于种种原因">
+<meta property="og:type" content="article">
+<meta property="og:title" content="maven配置使用本地仓库">
+<meta property="og:url" content="http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/index.html">
+<meta property="og:site_name" content="你跺你也麻">
+<meta property="og:description" content="1. 内网开发的问题内网开发是个好东西：安全、方便管理；但又被我们深恶痛绝：没法远程工作或者要用蛋疼的VPN，软件没法及时更新，查资料不方便，没法Ctrl+C&amp;V……。这些还可以忍一忍，但是作为后端开发，在没有网络环境的情况下安装项目依赖就成了不得不解决的问题。 这时有的同学就会说了：内网开发应该有统一的私有镜像仓库呀。确实，根据小道消息，我司之前确实是有一个私有仓库，但是总之由于种种原因">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/Zhang/AppData/Roaming/Typora/typora-user-images/image-20220713145540533.png">
+<meta property="og:image" content="c:/Users/Zhang/AppData/Roaming/Typora/typora-user-images/image-20220713153811178.png">
+<meta property="article:published_time" content="2022-07-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-21T07:40:21.798Z">
+<meta property="article:author" content="zad">
+<meta property="article:tag" content="内网开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/Zhang/AppData/Roaming/Typora/typora-user-images/image-20220713145540533.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>maven配置使用本地仓库</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/07/20/HashMap%EF%BC%882%EF%BC%89-%20put%E3%80%81get%E5%92%8Cremove%E6%96%B9%E6%B3%95/"><i class="fa fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/07/12/HashMap%EF%BC%881%EF%BC%89-%20%E5%AE%9A%E4%B9%89%EF%BC%8C%E9%9D%99%E6%80%81%E5%8F%98%E9%87%8F%E5%92%8C%E5%86%85%E9%83%A8%E7%B1%BB/"><i class="fa fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fa fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/"><i class="fa fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&text=maven配置使用本地仓库"><i class="fa fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&is_video=false&description=maven配置使用本地仓库"><i class="fa fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=maven配置使用本地仓库&body=Check out this article: http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/"><i class="fa fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&name=maven配置使用本地仓库&description="><i class="fa fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%86%85%E7%BD%91%E5%BC%80%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 内网开发的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-maven%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">2. maven配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-IDEA%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">3. IDEA配置</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index width mx-auto px2 my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        maven配置使用本地仓库
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">你跺你也麻</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2022-07-12T16:00:00.000Z" itemprop="datePublished">2022-07-13</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E5%86%85%E7%BD%91%E5%BC%80%E5%8F%91/" rel="tag">内网开发</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="1-内网开发的问题"><a href="#1-内网开发的问题" class="headerlink" title="1. 内网开发的问题"></a>1. 内网开发的问题</h2><p>内网开发是个好东西：安全、方便管理；但又被我们深恶痛绝：没法远程工作或者要用蛋疼的VPN，软件没法及时更新，查资料不方便，<del>没法Ctrl+C&amp;V</del>……。这些还可以忍一忍，但是作为后端开发，在没有网络环境的情况下安装项目依赖就成了不得不解决的问题。</p>
+<p>这时有的同学就会说了：内网开发<strong>应该</strong>有统一的私有镜像仓库呀。确实，根据小道消息，我司之前确实是有一个私有仓库，但是总之由于种种原因，<del>没有专人维护/新增依赖需要走漫长的审批流程/网络服务不稳定</del>，这个仓库目前处于废弃状态。</p>
+<p>目前大家使用办法非常的简单粗暴，把内网的<code>pom.xml</code>拷贝到外网，将依赖下载到一个新的<code>repository</code>目录，再把整个文件夹打包拷贝到内网。这种方式在新搭建项目时还算好用，但是遇到在项目中需要集成新依赖或者需要升级依赖版本的情况时，麻烦就出现了：第一，哪怕其它项目的仓库中已经有了这些依赖，也没法直接使用；第二，由于手动向仓库中添加依赖会产生各种各样的问题（包括但不限于：依赖特别多搞了一整天/加错了目录/加到了正确的目录但就是读取不到），所以需要再次将全部的依赖重新下载/打包/拷贝，非常麻烦。</p>
+<p>那么有没有可以解决这些麻烦的办法呢，当然是有的，就是使用maven的<code>&lt;mirror&gt;</code>配置。</p>
+<h2 id="2-maven配置"><a href="#2-maven配置" class="headerlink" title="2. maven配置"></a>2. maven配置</h2><p>首先，你需要把包含所需要依赖的仓库保存到你内网的本地路径下。</p>
+<p>其实操作方式类似配置私有镜像仓库，区别是把私有仓库的地址换为本地文件路径。</p>
+<p>修改你的<code>settings.xml</code>:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">settings</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">          <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">&lt;!-- localRepository 本地仓库路径--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">localRepository</span>&gt;</span>D:/maven/repository<span class="tag">&lt;/<span class="name">localRepository</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">&lt;!-- offline 离线模式,默认为false,需要改为true  --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">offline</span>&gt;</span>true<span class="tag">&lt;/<span class="name">offline</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">pluginGroups</span>&gt;</span><span class="tag">&lt;/<span class="name">pluginGroups</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">proxies</span>&gt;</span><span class="tag">&lt;/<span class="name">proxies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servers</span>&gt;</span><span class="tag">&lt;/<span class="name">servers</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">&lt;!-- mirrors 镜像列表，我们需要配置的部分--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">mirrors</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- mirror --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mirror</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- mirrorId,取一个你喜欢的名字,不重复就行 --&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">id</span>&gt;</span>makabaka<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- repositoryId, 填*就行 --&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">mirrorOf</span>&gt;</span>*<span class="tag">&lt;/<span class="name">mirrorOf</span>&gt;</span></span><br><span class="line">	  <span class="comment">&lt;!-- name, 用人类能看懂的语言给它再取个名字 --&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">name</span>&gt;</span>张伟<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!-- url, 重点！包含所需要依赖的仓库的本地路径 --&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">url</span>&gt;</span>file://D:/maven/makabaka/repository<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">mirror</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">mirrors</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">  <span class="tag">&lt;<span class="name">profiles</span>&gt;</span><span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">settings</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="3-IDEA配置"><a href="#3-IDEA配置" class="headerlink" title="3. IDEA配置"></a>3. IDEA配置</h2><p>接下来是IDE的配置，我用的是IntelliJ IDEA 2021.3.2。</p>
+<p>首先打开<code>file-&gt;Settings-&gt;Build,Execution,Deployment-&gt;Building Tools-&gt;Maven</code>，修改<code>settings.xml</code>的路径，使用我们自己设置的配置文件。</p>
+<p><img src="C:\Users\Zhang\AppData\Roaming\Typora\typora-user-images\image-20220713145540533.png" alt="image-20220713145540533"></p>
+<p>点击<code>Apply</code>，再重新import项目，就ok啦。</p>
+<p><img src="C:\Users\Zhang\AppData\Roaming\Typora\typora-user-images\image-20220713153811178.png" alt="image-20220713153811178"></p>
+
+  </div>
+</article>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%86%85%E7%BD%91%E5%BC%80%E5%8F%91%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 内网开发的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-maven%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">2. maven配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-IDEA%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">3. IDEA配置</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/"><i class="fa fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&text=maven配置使用本地仓库"><i class="fa fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&is_video=false&description=maven配置使用本地仓库"><i class="fa fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=maven配置使用本地仓库&body=Check out this article: http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&title=maven配置使用本地仓库"><i class="fa fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/07/13/%E4%BD%BF%E7%94%A8maven%E7%9A%84mirror%E9%85%8D%E7%BD%AE%E4%BB%8E%E6%9C%AC%E5%9C%B0%E8%8E%B7%E5%8F%96%E4%BE%9D%E8%B5%96/&name=maven配置使用本地仓库&description="><i class="fa fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+      <ul>
+        <li id="toc"><a class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa fa-list fa-lg" aria-hidden="true"></i> TOC</a></li>
+        <li id="share"><a class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa fa-share-alt fa-lg" aria-hidden="true"></i> Share</a></li>
+        <li id="top" style="display:none"><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a></li>
+        <li id="menu"><a class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa fa-bars fa-lg" aria-hidden="true"></i> Menu</a></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2022 zad
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="/lib/meslo-LG/styles.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-37473492-6', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+
