@@ -13,13 +13,13 @@
 <meta property="og:site_name" content="你跺你也麻">
 <meta property="og:description" content="1. @SpringBootApplication注解​    @SpringBootApplication除了元注解之外，主要包括三个注解：@SpringBootConfiguration、@EnableAutoConfiguration和@ComponentScan。  SpringBootConfiguration 继承自@Configuration，标注当前类是配置类，声明了一个或者多个@">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="c:/Users/Zhang/Desktop/springboot启动流程.png">
+<meta property="og:image" content="https://zhangandong12138.github.io/images/221110/1.png">
 <meta property="article:published_time" content="2022-11-09T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-04-14T08:06:26.069Z">
+<meta property="article:modified_time" content="2023-04-14T08:13:36.191Z">
 <meta property="article:author" content="zad">
 <meta property="article:tag" content="八股文">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="c:/Users/Zhang/Desktop/springboot启动流程.png">
+<meta name="twitter:image" content="https://zhangandong12138.github.io/images/221110/1.png">
     
     
         
@@ -159,7 +159,7 @@
 <p>​    <code>@Import</code>注解的作用相当于xml文件中的<code>&lt;import&gt;</code>，可以提前引入需要的<code>@Configuratrion</code>类或者<code>ImportSelector</code>和<code> ImportBeanDefinitionRegistrar</code>接口的实现。</p>
 <p>​    这里引入的<code>AutoConfigurationImportSelector</code>就是一个<code>ImportSelector</code>的实现。</p>
 <p>​    <code>@Import</code>注解会由<code>ConfigurationClassPostProcessor</code>在调用<code>BeanFactoryPostProcessor</code>时触发，最终调用到<code>ConfigurationClassParser</code>中的<code>doProcessConfigurationClass()</code>方法中被处理，也就是加载<code>AutoConfigurationImportSelector</code>到IOC容器中；而在同一个类中的<code>parse(Set&lt;BeanDefinitionHolder&gt; configCandidates)</code>方法的最后，实际调用了<code>ImportSelector</code>中的逻辑，最终由内部类<code>DeferredImportSelectorGrouping</code>中的<code>getImports()</code>方法调用了<code>AutoConfigurationImportSelector</code>中的<code>process</code>方法。实际的处理逻辑，是去所有的<code>spring.factories</code>配置文件中，读取<code>EnableAutoConfiguration</code>配置的类，返回并加载到<code>BeanFactory</code>中的<code>BeanDefinitionNames</code>中，（注意这里并没有进行实例化），最终和其它的bean定义对象一同实例化。</p>
-<h3 id="3-SpringApplication的启动流程"><a href="#3-SpringApplication的启动流程" class="headerlink" title="3.  SpringApplication的启动流程"></a>3.  SpringApplication的启动流程</h3><img src="C:\Users\Zhang\Desktop\springboot启动流程.png" alt="springboot启动流程"  />
+<h3 id="3-SpringApplication的启动流程"><a href="#3-SpringApplication的启动流程" class="headerlink" title="3.  SpringApplication的启动流程"></a>3.  SpringApplication的启动流程</h3><img src="https://zhangandong12138.github.io/images/221110/1.png" alt="springboot启动流程"  />
 
 <h3 id="4-Spring的SPI机制"><a href="#4-Spring的SPI机制" class="headerlink" title="4. Spring的SPI机制"></a>4. Spring的SPI机制</h3><p>​    SPI ，全称为 Service Provider Interface，是一种服务发现机制。它通过在ClassPath路径下的META-INF/services文件夹查找文件，自动加载文件里所定义的类。Spring是通过读取META-INF/spring.factories文件来实现SPI机制的。</p>
 <h3 id="5-spring-factories文件是如何被读取的"><a href="#5-spring-factories文件是如何被读取的" class="headerlink" title="5. spring.factories文件是如何被读取的"></a>5. spring.factories文件是如何被读取的</h3><p>​    <code>SpringFactoriesLoader</code>类中有两个静态方法<code>loadFactories</code>和<code>loadFactoryNames</code>这两个方法分别可以从META-INF/spring.factories文件中加载指定类型的class。</p>
