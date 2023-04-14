@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="1. 遇到问题在上一篇文章中，我们用SpringCloud Gateway开发了一个动态API网关，但是在系统上线后，调用方反馈说调用一个需要上传图片的接口报错。这个接口要求将图片的base64格式编码放在json格式的请求体中提交。而具体的问题现象是，当调用代理后的接口时会报错，而调用代理前的原始接口情况正常。 2. 定位原因首先用调用方提供的参数拿postman调用了接口，发现返回结果正常。询">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud Gateway、libcurl 56错误和HTTP状态码100">
+<meta property="og:url" content="http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/index.html">
+<meta property="og:site_name" content="你跺你也麻">
+<meta property="og:description" content="1. 遇到问题在上一篇文章中，我们用SpringCloud Gateway开发了一个动态API网关，但是在系统上线后，调用方反馈说调用一个需要上传图片的接口报错。这个接口要求将图片的base64格式编码放在json格式的请求体中提交。而具体的问题现象是，当调用代理后的接口时会报错，而调用代理前的原始接口情况正常。 2. 定位原因首先用调用方提供的参数拿postman调用了接口，发现返回结果正常。询">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://http.cat/100">
+<meta property="article:published_time" content="2022-09-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-04-14T09:32:04.129Z">
+<meta property="article:author" content="zad">
+<meta property="article:tag" content="微服务学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://http.cat/100">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>SpringCloud Gateway、libcurl 56错误和HTTP状态码100</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body>
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fa fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2022/11/07/%E4%B8%80%E4%BA%9BSpring%E9%9D%A2%E8%AF%95%E9%A2%98/"><i class="fa fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2022/08/18/%E7%94%A8SpringCloud%20Gateway%E5%81%9A%E4%B8%80%E4%B8%AA%E5%8A%A8%E6%80%81API%E7%BD%91%E5%85%B3/"><i class="fa fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fa fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/"><i class="fa fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&text=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&is_video=false&description=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SpringCloud Gateway、libcurl 56错误和HTTP状态码100&body=Check out this article: http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/"><i class="fa fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&name=SpringCloud Gateway、libcurl 56错误和HTTP状态码100&description="><i class="fa fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%81%87%E5%88%B0%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 遇到问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%AE%9A%E4%BD%8D%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">2. 定位原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">3. 解决方案</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index width mx-auto px2 my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        SpringCloud Gateway、libcurl 56错误和HTTP状态码100
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">你跺你也麻</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2022-09-13T16:00:00.000Z" itemprop="datePublished">2022-09-14</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AD%A6%E4%B9%A0/" rel="tag">微服务学习</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="1-遇到问题"><a href="#1-遇到问题" class="headerlink" title="1. 遇到问题"></a>1. 遇到问题</h2><p>在上一篇文章中，我们用<code>SpringCloud Gateway</code>开发了一个动态API网关，但是在系统上线后，调用方反馈说调用一个需要上传图片的接口报错。这个接口要求将图片的<code>base64</code>格式编码放在<code>json</code>格式的请求体中提交。而具体的问题现象是，当调用代理后的接口时会报错，而调用代理前的原始接口情况正常。</p>
+<h2 id="2-定位原因"><a href="#2-定位原因" class="headerlink" title="2. 定位原因"></a>2. 定位原因</h2><p>首先用调用方提供的参数拿postman调用了接口，发现返回结果正常。询问了调用方，他们是在生产环境服务器上使用<code>curl</code>命令进行的测试，于是我找来一台linux服务器，发现确实像他们所说的，在服务器上用<code>curl</code>命令调用会失败。而这时调用方反馈，他们在程序中调用时同样也会报错。</p>
+<p>于是又推测是不是服务器的网络环境有问题，查了一圈之后，发现网络环境正常，而且这时候我发现了一个奇怪的现象：在服务器上用<code>curl</code>调用时，如果传一个很小的图片，就不会出现错误。莫非跟请求体的大小有关系？</p>
+<p>这时候调用方把他们调用程序和调用日志发给了我们，我惊奇的发现，原来他们用的是C++。其中几行代码是这样的</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CURLcode res = curl_easy_perform(curl);</span><br><span class="line">curl_easy_cleanup(curl);</span><br><span class="line">   </span><br><span class="line"><span class="keyword">if</span> (CURLE_OK != res) &#123;</span><br><span class="line">	logInfo(<span class="string">&quot;curl_easy_perform failed, res=%d&quot;</span>, res);</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而打出的日志是这样的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl easy perform failed,res&#x3D;56</span><br></pre></td></tr></table></figure>
+<p>虽然不会C++，但是看名字就能猜得出来，这个<code>curl_easy_cleanup</code>方法还是通过调用curl来发送请求。那么基本就可以确定问题出在curl本身了。百度了一下，原来这个方法属于大名鼎鼎的<code>libcurl</code>库，状态码56表示：failure in receiving network data，翻译过来就是接收网络数据错误。</p>
+<p>那么为什么会出现接收网络数据错误呢，给curl 加一个<code>-v</code>参数，看一下转发服务到底响应了什么，不试不要紧，一试吓一跳：服务器什么都没有返回！再看请求头，有这么一行很可疑：<code>Expect: 100-continue</code>。100是啥意思？</p>
+<p>是这个意思：</p>
+<p><img src="https://http.cat/100" alt="100-cat"></p>
+<blockquote>
+<p>该状态码说明服务器收到了请求的初始部分，并且请客户端继续发送。在服务器发送了 100 Continue 状态码之后，如果收到客户端的请求，则必须进行响应。</p>
+<p>这个状态码实际上是对如下场景的一种优化：客户端有一个较大的文件需要上传并保存，但是客户端不知道服务器是否愿意接受这个文件，所以希望在消耗网络资源进行传输之前，先询问一下服务器的意愿。实际操作为客户端发送一条特殊的请求报文，报文的头部应包含<code>Expect: 100-continue</code>。</p>
+<p>此时，如果服务器愿意接受，就会返回 100 Continue 状态码，反之则返回 417 Expectation Failed 状态码。对于客户端而言，如果客户端没有发送实际请求的打算，则不应该发送包含 100 Continue Expect 的报文，因为这样会让服务器误以为客户端将要发送一个请求。</p>
+</blockquote>
+<p>简单来说，正常情况应该是这样的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl对服务器: &quot;哥，我有个大宝贝要给你，你看我给你发的这玩意行吗，能继续吗？&quot;</span><br><span class="line">服务器: &quot;彳亍，整挺好，继续吧。&quot;</span><br><span class="line">curl: &quot;打南边来了个喇嘛……&quot;</span><br></pre></td></tr></table></figure>
+<p>但是我们的SpringCloud Gateway转发服务并不能处理<code>Expect: 100-continue</code>这个请求头，于是情况变成了这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl对服务器: &quot;哥，我有个大宝贝要给你，你看我给你发的这玩意行吗，能继续吗？&quot;</span><br><span class="line">转发服务: &quot;(艾玛这啥呀，我不知道咋整啊)……&quot;</span><br><span class="line">curl: &quot;……(超时)&quot;</span><br></pre></td></tr></table></figure>
+<p>问题一下就明了了。</p>
+<h2 id="3-解决方案"><a href="#3-解决方案" class="headerlink" title="3. 解决方案"></a>3. 解决方案</h2><p>解决方案很简单，curl在请求的时候不再等待服务器返回<code>100-continue</code>，就继续后面的传输即可。也就是设置请求头<code>Expect:</code>。</p>
+
+  </div>
+</article>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%81%87%E5%88%B0%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 遇到问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%AE%9A%E4%BD%8D%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">2. 定位原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">3. 解决方案</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/"><i class="fa fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&text=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&is_video=false&description=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SpringCloud Gateway、libcurl 56错误和HTTP状态码100&body=Check out this article: http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&title=SpringCloud Gateway、libcurl 56错误和HTTP状态码100"><i class="fa fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/14/SpringCloud%20Gateway%E3%80%81libcurl%2056%E9%94%99%E8%AF%AF%E5%92%8CHTTP%E7%8A%B6%E6%80%81%E7%A0%81100/&name=SpringCloud Gateway、libcurl 56错误和HTTP状态码100&description="><i class="fa fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+      <ul>
+        <li id="toc"><a class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa fa-list fa-lg" aria-hidden="true"></i> TOC</a></li>
+        <li id="share"><a class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa fa-share-alt fa-lg" aria-hidden="true"></i> Share</a></li>
+        <li id="top" style="display:none"><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a></li>
+        <li id="menu"><a class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa fa-bars fa-lg" aria-hidden="true"></i> Menu</a></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2023 zad
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/posts/">Writing</a></li>
+         
+          <li><a target="_blank" rel="noopener" href="http://github.com/ZhangAndong12138">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="/lib/meslo-LG/styles.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/justifiedGallery.min.css">
+
+
+<!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/main.js"></script>
+
+
+
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-37473492-6', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+
